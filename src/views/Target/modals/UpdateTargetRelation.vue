@@ -18,12 +18,15 @@
       >
         <component
           :is="schema.component"
-          :placeholder="schema.componentProps.placeholder"
           size="large"
+          v-bind="schema.componentProps"
           v-model:value="stateFormData[schema.field]"
         >
-          <template :key="opt.value" v-for="opt in schema.componentProps?.options || []">
-            <Options :value="opt.value">{{ opt.label }}</Options>
+          <template v-if="fetching" #notFoundContent>
+            <div class="text-center">
+              <Spin size="small" />
+              数据查询中...
+            </div>
           </template>
         </component>
       </FormItem>
@@ -43,22 +46,32 @@
         }"
       >
         <a-button :style="{ marginRight: '8px' }" @click="onReset"> 重置 </a-button>
-        <a-button type="primary" @click="onSubmit"> 提交 </a-button>
+        <a-button type="primary" @click="onSubmit" :loading="submiting"> 提交 </a-button>
       </div>
     </template>
   </BasicDrawer>
 </template>
 <script lang="ts">
-  import { createVNode, defineComponent, ref, watch, unref, nextTick } from 'vue';
+  import {
+    createVNode,
+    defineComponent,
+    ref,
+    watch,
+    unref,
+    nextTick,
+    getCurrentInstance,
+    ComponentPublicInstance,
+  } from 'vue';
   import { getRelationUpdateSchema } from '../_config';
   import { BasicDrawer } from '/@/components/Drawer';
   import { BasicForm, FormActionType } from '/@/components/Form/index';
   import { CollapseContainer } from '/@/components/Container/index';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { Modal, Form, FormItem, Input, Textarea, Select } from 'ant-design-vue';
+  import { Modal, Form, FormItem, Input, Select, Spin } from 'ant-design-vue';
   import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
   import { ValidateErrorEntity } from 'ant-design-vue/lib/form/interface';
-  const schemas = getRelationUpdateSchema();
+  import Api from '/@/api';
+
   export default defineComponent({
     props: {
       mode: {
@@ -77,14 +90,20 @@
       Form,
       FormItem,
       Input,
-      Textarea,
+      Textarea: Input.TextArea,
       Select,
       Options: Select.Option,
+      Spin,
     },
-    setup(props) {
+    setup(props, { emit }) {
+      let timer = null;
+      const { proxy } = getCurrentInstance();
+      const schemas = ref(getRelationUpdateSchema(proxy));
       const formRef = ref<Nullable<FormActionType>>(null);
       const formData = {};
-      (schemas.map((s) => s.field) || []).forEach((s) => {
+      const fetching = ref(false);
+      const submiting = ref(false);
+      (schemas.value.map((s) => s.field) || []).forEach((s) => {
         formData[`${s}`] = null;
       });
       const stateFormData = ref({ ...formData });
@@ -98,6 +117,27 @@
         await nextTick();
         return form as FormActionType;
       }
+
+      async function fetchTargetListByName(name) {
+        const res = await Api.targetList({
+          pageSize: 1000,
+          pageNo: 1,
+          filter: { targetTypeName: name },
+        });
+        return res?.content || [];
+      }
+
+      const onParentChange = async (e, type) => {
+        fetching.value = true;
+        const index = schemas.value.findIndex((val) => val.field === type);
+        schemas.value[index].componentProps.options = [];
+        const res = await fetchTargetListByName(e);
+        schemas.value[index].componentProps.options = res.map((val) => ({
+          label: `${val.targetTypeName}(${val.targetTypeCode})`,
+          value: val.targetTypeCode,
+        }));
+        fetching.value = false;
+      };
 
       watch(
         () => props.dataSource,
@@ -122,8 +162,21 @@
         const form = await getForm();
         form
           .validate()
-          .then(() => {
+          .then(async () => {
             createMessage.success('click search,values:' + JSON.stringify(stateFormData.value));
+            submiting.value = true;
+            try {
+              const res = await Api.createTargetRelation({ ...unref(stateFormData.value) });
+              if (!!res) {
+                createMessage.success('操作成功！');
+                emit('update:visible', false);
+                emit('reloadTable');
+              }
+            } catch (e) {
+              console.error(e);
+            } finally {
+              submiting.value = false;
+            }
           })
           .catch((error: ValidateErrorEntity<any>) => {
             console.log('error', error);
@@ -153,6 +206,9 @@
         onSubmit,
         onReset,
         stateFormData,
+        onParentChange,
+        fetching,
+        submiting,
       };
     },
   });

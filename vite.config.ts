@@ -8,6 +8,8 @@ import { createProxy } from './build/vite/proxy';
 import { wrapperEnv } from './build/utils';
 import { createVitePlugins } from './build/vite/plugin';
 import { OUTPUT_DIR } from './build/constant';
+import commonjs from 'rollup-plugin-commonjs';
+import externalGlobals from 'rollup-plugin-external-globals';
 
 function pathResolve(dir: string) {
   return resolve(process.cwd(), '.', dir);
@@ -72,6 +74,14 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       // Turning off brotliSize display can slightly reduce packaging time
       brotliSize: false,
       chunkSizeWarningLimit: 2000,
+      // rollupOptions: {
+      //   external: ['ant-design-vue'],
+      //   output: {
+      //     globals: {
+      //       'ant-design-vue': 'antd',
+      //     },
+      //   },
+      // },
     },
     define: {
       // setting vue-i18-next

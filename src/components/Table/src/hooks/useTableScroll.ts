@@ -56,7 +56,7 @@ export function useTableScroll(
 
   async function calcTableHeight() {
     const { resizeHeightOffset, pagination, maxHeight } = unref(propsRef);
-    const tableData = unref(getDataSourceRef);
+    const tableData = unref(getDataSourceRef) || [];
 
     const table = unref(tableElRef);
     if (!table) return;

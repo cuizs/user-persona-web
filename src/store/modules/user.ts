@@ -124,7 +124,23 @@ export const useUserStore = defineStore({
     },
     async getUserInfoAction(): Promise<UserInfo | null> {
       if (!this.getToken) return null;
-      const userInfo = await getUserInfo();
+      // const userInfo = await getUserInfo();
+      const userInfo = {
+        userId: '2',
+        username: 'test',
+        password: '123456',
+        realName: 'Ryan Cui',
+        avatar: 'https://q1.qlogo.cn/g?b=qq&nk=339449197&s=640',
+        desc: 'tester',
+        token: 'fakeToken2',
+        homePath: '/target/index',
+        roles: [
+          {
+            roleName: 'Tester',
+            value: 'test',
+          },
+        ],
+      };
       const { roles = [] } = userInfo;
       if (isArray(roles)) {
         const roleList = roles.map((item) => item.value) as RoleEnum[];

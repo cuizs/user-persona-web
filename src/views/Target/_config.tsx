@@ -1,6 +1,7 @@
+import { ComponentPublicInstance } from 'vue';
 import { FormProps, FormSchema } from '/@/components/Table';
 import { BasicColumn } from '/@/components/Table/src/types/table';
-
+import { debounce } from 'lodash-es';
 // 目标类别列表 table config
 export function getTargetColumns(): BasicColumn[] {
   return [
@@ -41,7 +42,7 @@ export function getTargetSearchBarConfig(): Partial<FormProps> {
     },
     schemas: [
       {
-        field: `name`,
+        field: `targetTypeCode`,
         label: `编号`,
         component: 'Input',
         colProps: {
@@ -50,7 +51,7 @@ export function getTargetSearchBarConfig(): Partial<FormProps> {
         },
       },
       {
-        field: `name`,
+        field: `targetTypeName`,
         label: `目标名称`,
         component: 'Input',
         colProps: {
@@ -59,16 +60,7 @@ export function getTargetSearchBarConfig(): Partial<FormProps> {
         },
       },
       {
-        field: `name`,
-        label: `目标类型`,
-        component: 'Input',
-        colProps: {
-          xl: 8,
-          xxl: 4,
-        },
-      },
-      {
-        field: `name`,
+        field: `targetSource`,
         label: `目标来源`,
         component: 'Input',
         colProps: {
@@ -80,7 +72,7 @@ export function getTargetSearchBarConfig(): Partial<FormProps> {
   };
 }
 
-export function getTargetUpdateSchema(): any[] {
+export function getTargetUpdateSchema(_this): any[] {
   return [
     {
       field: 'targetTypeCode',
@@ -262,7 +254,7 @@ export function getTargetRelationSearchBarConfig(): Partial<FormProps> {
 //   "targetRelationDesc": "string",
 //   "updated": "2021-12-01T06:17:32.121Z"
 // }
-export function getRelationUpdateSchema(): any[] {
+export function getRelationUpdateSchema(_this): any[] {
   return [
     {
       field: 'relationTypeCode',
@@ -310,13 +302,13 @@ export function getRelationUpdateSchema(): any[] {
       label: '父目标类别',
       componentProps: {
         placeholder: '请选择目标关系数据来源',
-        options: [
-          { label: '类别1', value: '1' },
-          { label: '来源2', value: '2' },
-        ],
-        onChange: (e: any) => {
-          console.log(e);
-        },
+        options: [],
+        loading: false,
+        onSearch: debounce((e: any) => {
+          _this.onParentChange.call(_this, e, 'parentTypeCode');
+        }, 300),
+        ['show-search']: true,
+        ['filter-option']: false,
       },
     },
     {
@@ -332,12 +324,15 @@ export function getRelationUpdateSchema(): any[] {
       componentProps: {
         placeholder: '请选择目标关系数据来源',
         options: [
-          { label: '类别1', value: '1' },
+          { label: '类别1', value: 'doctor' },
           { label: '类别2', value: '2' },
         ],
-        onChange: (e: any) => {
-          console.log(e);
-        },
+        loading: false,
+        onSearch: debounce((e: any) => {
+          _this.onParentChange.call(_this, e, 'childTypeCode');
+        }, 300),
+        ['show-search']: true,
+        ['filter-option']: false,
       },
     },
     {

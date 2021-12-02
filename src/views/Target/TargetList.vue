@@ -36,6 +36,7 @@
       v-model:visible="updateDrawerVisible"
       :mode="updateMode"
       :dataSource="updateDataSource"
+      @reloadTable="handleReloadTable"
     />
   </PageWrapper>
 </template>
@@ -73,10 +74,21 @@
         formConfig: getTargetSearchBarConfig(),
         showIndexColumn: false,
         rowKey: 'id',
+        pagination: { pageSize: 10 },
+        fetchSetting: {
+          listField: 'content',
+          // pageField: 'number',
+          // sizeField: 'size',
+        },
         actionColumn: {
           title: '操作',
           dataIndex: 'action',
           slots: { customRender: 'action' },
+        },
+        beforeFetch: (params) => {
+          console.log('params', params);
+          const { page, pageSize, ...filter } = params;
+          return { page, pageSize, filter };
         },
       });
       const updateDrawerVisible = ref(false);
@@ -103,6 +115,11 @@
       function onSelectChange(key, record) {
         JSONData.value = record[0];
       }
+
+      function handleReloadTable(reload = false) {
+        console.log(rest);
+        rest.reload();
+      }
       return {
         registerTable,
         getFormValues,
@@ -114,6 +131,7 @@
         updateDataSource,
         JSONData,
         onSelectChange,
+        handleReloadTable,
       };
     },
   });

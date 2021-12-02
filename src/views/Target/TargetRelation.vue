@@ -37,6 +37,7 @@
       v-model:visible="updateDrawerVisible"
       :mode="updateMode"
       :dataSource="updateDataSource"
+      @reloadTable="handleReloadTable"
     />
   </PageWrapper>
 </template>
@@ -75,6 +76,12 @@
         formConfig: getTargetRelationSearchBarConfig(),
         showIndexColumn: false,
         rowKey: 'relationTypeCode',
+        pagination: { pageSize: 10 },
+        fetchSetting: {
+          listField: 'content',
+          // pageField: 'number',
+          // sizeField: 'size',
+        },
         actionColumn: {
           title: '操作',
           dataIndex: 'action',
@@ -105,6 +112,10 @@
       function onSelectChange(key, record) {
         JSONData.value = record[0];
       }
+
+      function handleReloadTable(reload = false) {
+        rest.reload();
+      }
       return {
         registerTable,
         getFormValues,
@@ -116,6 +127,7 @@
         updateDataSource,
         JSONData,
         onSelectChange,
+        handleReloadTable,
       };
     },
   });

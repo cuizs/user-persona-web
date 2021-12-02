@@ -43,22 +43,30 @@
         }"
       >
         <a-button :style="{ marginRight: '8px' }" @click="onReset"> 重置 </a-button>
-        <a-button type="primary" @click="onSubmit"> 提交 </a-button>
+        <a-button type="primary" @click="onSubmit" :loading="submiting"> 提交 </a-button>
       </div>
     </template>
   </BasicDrawer>
 </template>
 <script lang="ts">
-  import { createVNode, defineComponent, ref, watch, unref, nextTick } from 'vue';
+  import {
+    createVNode,
+    defineComponent,
+    ref,
+    watch,
+    unref,
+    nextTick,
+    getCurrentInstance,
+  } from 'vue';
   import { getTargetUpdateSchema } from '../_config';
   import { BasicDrawer } from '/@/components/Drawer';
   import { BasicForm, FormActionType } from '/@/components/Form/index';
   import { CollapseContainer } from '/@/components/Container/index';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { Modal, Form, FormItem, Input, Textarea, Select } from 'ant-design-vue';
+  import { Modal, Form, FormItem, Input, Select } from 'ant-design-vue';
   import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
   import { ValidateErrorEntity } from 'ant-design-vue/lib/form/interface';
-  const schemas = getTargetUpdateSchema();
+  import Api from '/@/api';
   export default defineComponent({
     props: {
       mode: {
@@ -77,12 +85,16 @@
       Form,
       FormItem,
       Input,
-      Textarea,
+      Textarea: Input.TextArea,
       Select,
       Options: Select.Option,
     },
-    setup(props) {
+    setup(props, { emit }) {
+      const { proxy } = getCurrentInstance();
+      const schemas = getTargetUpdateSchema(proxy);
+
       const formRef = ref<Nullable<FormActionType>>(null);
+      const submiting = ref(false);
       const formData = {};
       (schemas.map((s) => s.field) || []).forEach((s) => {
         formData[`${s}`] = null;
@@ -122,8 +134,21 @@
         const form = await getForm();
         form
           .validate()
-          .then(() => {
+          .then(async () => {
             createMessage.success('click search,values:' + JSON.stringify(stateFormData.value));
+            submiting.value = true;
+            try {
+              const res = await Api.createTargetType({ ...unref(stateFormData.value) });
+              if (!!res) {
+                createMessage.success('操作成功！');
+                emit('update:visible', false);
+                emit('reloadTable');
+              }
+            } catch (e) {
+              console.error(e);
+            } finally {
+              submiting.value = false;
+            }
           })
           .catch((error: ValidateErrorEntity<any>) => {
             console.log('error', error);
@@ -153,6 +178,7 @@
         onSubmit,
         onReset,
         stateFormData,
+        submiting,
       };
     },
   });
