@@ -20,7 +20,7 @@
               color: 'error',
               popConfirm: {
                 title: '此操作不能撤回，请再次确定删除？',
-                confirm: handleDelete.bind(null),
+                confirm: handleDelete.bind(null, record),
               },
             },
           ]"
@@ -102,8 +102,16 @@
         updateDrawerVisible.value = visible;
       }
 
-      function handleDelete() {
-        createMessage.success('确定删除');
+      async function handleDelete(record) {
+        try {
+          const res = await Api.deleteTargetType(record.targetTypeCode);
+          if (!!res) {
+            createMessage.success('删除成功！');
+            handleReloadTable();
+          }
+        } catch (e) {
+          console.error(e);
+        }
       }
       function handleOpenUpdateDrawer(record = null) {
         updateMode.value = !!record ? 'edit' : 'new';

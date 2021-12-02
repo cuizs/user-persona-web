@@ -86,6 +86,7 @@ export function getTargetUpdateSchema(_this): any[] {
       ],
       componentProps: {
         placeholder: '请输入目标类别编码',
+        disabled: false,
         onChange: (e: any) => {
           console.log(e);
         },
@@ -268,6 +269,7 @@ export function getRelationUpdateSchema(_this): any[] {
       ],
       componentProps: {
         placeholder: '请输入目标关系编码',
+        disabled: false,
         onChange: (e: any) => {
           console.log(e);
         },
@@ -301,6 +303,7 @@ export function getRelationUpdateSchema(_this): any[] {
       component: 'Select',
       label: '父目标类别',
       componentProps: {
+        disabled: false,
         placeholder: '请选择目标关系数据来源',
         options: [],
         loading: false,
@@ -322,6 +325,7 @@ export function getRelationUpdateSchema(_this): any[] {
       component: 'Select',
       label: '子目标类别',
       componentProps: {
+        disabled: false,
         placeholder: '请选择目标关系数据来源',
         options: [
           { label: '类别1', value: 'doctor' },

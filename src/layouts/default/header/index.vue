@@ -47,7 +47,7 @@
         :showText="false"
         :class="`${prefixCls}-action__item`"
       /> -->
-
+      <AppDarkModeToggle v-if="!sessionTimeout" />
       <UserDropDown :theme="getHeaderTheme" />
 
       <!-- <SettingDrawer v-if="getShowSetting" :class="`${prefixCls}-action__item`" /> -->
@@ -60,7 +60,8 @@
   import { propTypes } from '/@/utils/propTypes';
 
   import { Layout } from 'ant-design-vue';
-  import { AppLogo } from '/@/components/Application';
+  import { AppLogo, AppDarkModeToggle } from '/@/components/Application';
+
   import LayoutMenu from '../menu/index.vue';
   import LayoutTrigger from '../trigger/index.vue';
 
@@ -80,7 +81,6 @@
 
   import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
   import { useLocale } from '/@/locales/useLocale';
-
   export default defineComponent({
     name: 'LayoutHeader',
     components: {
@@ -95,6 +95,7 @@
       Notify,
       AppSearch,
       ErrorAction,
+      AppDarkModeToggle,
       SettingDrawer: createAsyncComponent(() => import('/@/layouts/default/setting/index.vue'), {
         loading: true,
       }),

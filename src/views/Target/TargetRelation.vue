@@ -99,8 +99,16 @@
         updateDrawerVisible.value = visible;
       }
 
-      function handleDelete() {
-        createMessage.success('确定删除');
+      async function handleDelete(record) {
+        try {
+          const res = await Api.deleteTargetRelation(record.relationTypeCode);
+          if (!!res) {
+            createMessage.success('删除成功！');
+            handleReloadTable();
+          }
+        } catch (e) {
+          console.error(e);
+        }
       }
       function handleOpenUpdateDrawer(record = null) {
         updateMode.value = !!record ? 'edit' : 'new';

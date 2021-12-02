@@ -158,6 +158,17 @@
         },
       );
 
+      watch(
+        () => props.mode,
+        (val) => {
+          const editDisableItems = ['relationTypeCode', 'parentTypeCode', 'childTypeCode'];
+          editDisableItems.forEach((item) => {
+            const index = schemas.value.findIndex((schema) => schema.field === item);
+            schemas.value[index].componentProps.disabled = val === 'edit';
+          });
+        },
+      );
+
       const onSubmit = async () => {
         const form = await getForm();
         form
@@ -166,7 +177,15 @@
             createMessage.success('click search,values:' + JSON.stringify(stateFormData.value));
             submiting.value = true;
             try {
-              const res = await Api.createTargetRelation({ ...unref(stateFormData.value) });
+              let res;
+              if (props.mode === 'new') {
+                res = await Api.createTargetRelation({ ...unref(stateFormData.value) });
+              } else {
+                res = await Api.updateTargetRelation({
+                  ...unref(stateFormData.value),
+                  id: props.dataSource.id,
+                });
+              }
               if (!!res) {
                 createMessage.success('操作成功！');
                 emit('update:visible', false);

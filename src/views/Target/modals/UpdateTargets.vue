@@ -18,8 +18,8 @@
       >
         <component
           :is="schema.component"
-          :placeholder="schema.componentProps.placeholder"
           size="large"
+          v-bind="schema.componentProps"
           v-model:value="stateFormData[schema.field]"
         >
           <template :key="opt.value" v-for="opt in schema.componentProps?.options || []">
@@ -91,12 +91,12 @@
     },
     setup(props, { emit }) {
       const { proxy } = getCurrentInstance();
-      const schemas = getTargetUpdateSchema(proxy);
+      const schemas = ref(getTargetUpdateSchema(proxy));
 
       const formRef = ref<Nullable<FormActionType>>(null);
       const submiting = ref(false);
       const formData = {};
-      (schemas.map((s) => s.field) || []).forEach((s) => {
+      (schemas.value.map((s) => s.field) || []).forEach((s) => {
         formData[`${s}`] = null;
       });
       const stateFormData = ref({ ...formData });
@@ -130,6 +130,17 @@
         },
       );
 
+      watch(
+        () => props.mode,
+        (val) => {
+          const editDisableItems = ['targetTypeCode'];
+          editDisableItems.forEach((item) => {
+            const index = schemas.value.findIndex((schema) => schema.field === item);
+            schemas.value[index].componentProps.disabled = val === 'edit';
+          });
+        },
+      );
+
       const onSubmit = async () => {
         const form = await getForm();
         form
@@ -138,7 +149,15 @@
             createMessage.success('click search,values:' + JSON.stringify(stateFormData.value));
             submiting.value = true;
             try {
-              const res = await Api.createTargetType({ ...unref(stateFormData.value) });
+              let res;
+              if (props.mode === 'new') {
+                res = await Api.createTargetType({ ...unref(stateFormData.value) });
+              } else {
+                res = await Api.updateTargetType({
+                  ...unref(stateFormData.value),
+                  id: props.dataSource.id,
+                });
+              }
               if (!!res) {
                 createMessage.success('操作成功！');
                 emit('update:visible', false);
