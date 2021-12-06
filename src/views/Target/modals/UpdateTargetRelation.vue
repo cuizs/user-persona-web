@@ -31,20 +31,8 @@
         </component>
       </FormItem>
     </Form>
-    <template #appendFooter>
-      <div
-        :style="{
-          position: 'absolute',
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          borderTop: '1px solid #e9e9e9',
-          padding: '10px 16px',
-          background: '#fff',
-          textAlign: 'right',
-          zIndex: 1,
-        }"
-      >
+    <template #footer>
+      <div>
         <a-button :style="{ marginRight: '8px' }" @click="onReset"> 重置 </a-button>
         <a-button type="primary" @click="onSubmit" :loading="submiting"> 提交 </a-button>
       </div>
@@ -60,7 +48,7 @@
     unref,
     nextTick,
     getCurrentInstance,
-    ComponentPublicInstance,
+    ComponentInternalInstance,
   } from 'vue';
   import { getRelationUpdateSchema } from '../_config';
   import { BasicDrawer } from '/@/components/Drawer';
@@ -71,6 +59,7 @@
   import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
   import { ValidateErrorEntity } from 'ant-design-vue/lib/form/interface';
   import Api from '/@/api';
+  import { useDesign } from '/@/hooks/web/useDesign';
 
   export default defineComponent({
     props: {
@@ -80,7 +69,7 @@
       },
       dataSource: {
         type: Object,
-        default: {},
+        default: () => ({}),
       },
     },
     components: {
@@ -95,9 +84,11 @@
       Options: Select.Option,
       Spin,
     },
+    emits: ['update:visible', 'reloadTable'],
     setup(props, { emit }) {
-      let timer = null;
-      const { proxy } = getCurrentInstance();
+      const { prefixCls } = useDesign('dark-switch');
+
+      const { proxy } = getCurrentInstance() as ComponentInternalInstance;
       const schemas = ref(getRelationUpdateSchema(proxy));
       const formRef = ref<Nullable<FormActionType>>(null);
       const formData = {};
@@ -142,7 +133,7 @@
       watch(
         () => props.dataSource,
         (val) => {
-          if (!val) {
+          if (!val || Object.keys(val).length === 0) {
             stateFormData.value = { ...formData };
             return;
           }
@@ -228,6 +219,7 @@
         onParentChange,
         fetching,
         submiting,
+        prefixCls,
       };
     },
   });

@@ -1,5 +1,4 @@
-import { ComponentPublicInstance } from 'vue';
-import { FormProps, FormSchema } from '/@/components/Table';
+import { FormProps } from '/@/components/Table';
 import { BasicColumn } from '/@/components/Table/src/types/table';
 import { debounce } from 'lodash-es';
 // 目标类别列表 table config
@@ -40,14 +39,18 @@ export function getTargetSearchBarConfig(): Partial<FormProps> {
       xl: 16,
       xxl: 16,
     },
+    actionColOptions: {
+      xl: 6,
+      xxl: 6,
+    },
     schemas: [
       {
         field: `targetTypeCode`,
         label: `编号`,
         component: 'Input',
         colProps: {
-          xl: 8,
-          xxl: 4,
+          xl: 6,
+          xxl: 6,
         },
       },
       {
@@ -55,8 +58,8 @@ export function getTargetSearchBarConfig(): Partial<FormProps> {
         label: `目标名称`,
         component: 'Input',
         colProps: {
-          xl: 8,
-          xxl: 4,
+          xl: 6,
+          xxl: 6,
         },
       },
       {
@@ -64,8 +67,8 @@ export function getTargetSearchBarConfig(): Partial<FormProps> {
         label: `目标来源`,
         component: 'Input',
         colProps: {
-          xl: 8,
-          xxl: 4,
+          xl: 6,
+          xxl: 6,
         },
       },
     ],

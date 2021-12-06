@@ -51,7 +51,7 @@
     padding: 0 6px;
     margin-left: auto;
     cursor: pointer;
-    background-color: #151515;
+    background-color: @dark-switch-bg-color;
     border-radius: 30px;
     justify-content: space-between;
     align-items: center;

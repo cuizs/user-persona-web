@@ -1,7 +1,7 @@
 <template>
-  <PageWrapper title="目标管理">
+  <PageWrapper :title="t('routes.target.targetList')">
     <template #extra>
-      <Button type="primary" preIcon="carbon:add" @click="handleOpenUpdateDrawer(null)">
+      <Button type="primary" preIcon="carbon:add" @click="handleOpenUpdateDrawer()">
         添加目标
       </Button>
     </template>
@@ -45,24 +45,24 @@
   import { PageWrapper } from '/@/components/Page';
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
   import { getTargetColumns, getTargetSearchBarConfig } from './_config';
-  import { Alert, Button } from 'ant-design-vue';
+  import { Button } from 'ant-design-vue';
   import UpdateTarget from './modals/UpdateTargets.vue';
-  import { JsonPreview } from '/@/components/CodeEditor';
   import Api from '/@/api';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
   export default defineComponent({
     components: {
       PageWrapper,
       BasicTable,
-      AAlert: Alert,
       Button,
       TableAction,
       UpdateTarget,
-      JsonPreview,
     },
     setup() {
       const { createMessage } = useMessage();
+      const { t } = useI18n();
+
       const checkedKeys = ref<Array<string | number>>([]);
       const [registerTable, { getForm, ...rest }] = useTable({
         clickToRowSelect: true,
@@ -74,11 +74,12 @@
         formConfig: getTargetSearchBarConfig(),
         showIndexColumn: false,
         rowKey: 'id',
-        pagination: { pageSize: 10 },
+        pagination: { pageSize: 10, current: 0 },
+        ellipsis: false,
         fetchSetting: {
           listField: 'content',
-          // pageField: 'number',
-          // sizeField: 'size',
+          pageField: 'number',
+          sizeField: 'size',
         },
         actionColumn: {
           title: '操作',
@@ -87,13 +88,13 @@
         },
         beforeFetch: (params) => {
           console.log('params', params);
-          const { page, pageSize, ...filter } = params;
-          return { page, pageSize, filter };
+          const { number, size, ...filter } = params;
+          return { number: number, size, filter };
         },
       });
       const updateDrawerVisible = ref(false);
       const updateMode = ref('new');
-      const updateDataSource = ref(null);
+      const updateDataSource = ref({});
       function getFormValues() {
         console.log(getForm().getFieldsValue());
       }
@@ -113,22 +114,22 @@
           console.error(e);
         }
       }
-      function handleOpenUpdateDrawer(record = null) {
-        updateMode.value = !!record ? 'edit' : 'new';
+      function handleOpenUpdateDrawer(record = {}) {
+        updateMode.value = Object.keys(record).length !== 0 ? 'edit' : 'new';
         updateDataSource.value = record;
         toggleDrawerVisible(true);
       }
 
       const JSONData = ref(null);
-      function onSelectChange(key, record) {
+      function onSelectChange(_key, record) {
         JSONData.value = record[0];
       }
 
-      function handleReloadTable(reload = false) {
-        console.log(rest);
+      function handleReloadTable(_reload = false) {
         rest.reload();
       }
       return {
+        t,
         registerTable,
         getFormValues,
         checkedKeys,
@@ -146,6 +147,7 @@
 </script>
 
 <style lang="less" scoped>
+  @import '/@/design/index.less';
   .json-display-area {
     width: 400px;
     margin-left: 20px;

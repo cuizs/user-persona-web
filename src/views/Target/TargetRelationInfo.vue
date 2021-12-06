@@ -1,37 +1,18 @@
 <template>
-  <PageWrapper :title="t('routes.target.targetRelation')">
-    <template #extra>
-      <Button type="primary" preIcon="carbon:add" @click="handleOpenUpdateDrawer()">
-        新增关联关系
-      </Button>
-    </template>
-    <BasicTable @register="registerTable" class="enter-y">
-      <template #action="{ record }">
-        <TableAction
-          :actions="[
-            {
-              label: '编辑',
-              icon: 'akar-icons:edit',
-              onClick: handleOpenUpdateDrawer.bind(null, record),
-            },
-            {
-              label: '删除',
-              icon: 'carbon:delete',
-              color: 'error',
-              popConfirm: {
-                title: '此操作不能撤回，请再次确定删除？',
-                confirm: handleDelete.bind(null),
-                placement: 'leftTop',
-              },
-            },
-          ]"
-        />
-      </template>
-      <!-- <template #content-right>
+  <PageWrapper :title="t('routes.target.targetRelationInfo')">
+    <BasicTable
+      @register="registerTable"
+      class="enter-y"
+      :rowSelection="{
+        type: 'radio',
+        onChange: onSelectChange,
+      }"
+    >
+      <template #content-right>
         <div class="json-display-area">
           <JsonPreview :data="JSONData"></JsonPreview>
         </div>
-      </template> -->
+      </template>
     </BasicTable>
     <UpdateTargetRelation
       v-model:visible="updateDrawerVisible"
@@ -44,10 +25,10 @@
 <script lang="ts">
   import { defineComponent, ref } from 'vue';
   import { PageWrapper } from '/@/components/Page';
-  import { BasicTable, useTable, TableAction } from '/@/components/Table';
+  import { BasicTable, useTable } from '/@/components/Table';
   import { getRelationColumns, getTargetRelationSearchBarConfig } from './_config';
-  import { Button } from 'ant-design-vue';
   import UpdateTargetRelation from './modals/UpdateTargetRelation.vue';
+  import { JsonPreview } from '/@/components/CodeEditor';
   import Api from '/@/api';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -56,9 +37,8 @@
     components: {
       PageWrapper,
       BasicTable,
-      Button,
-      TableAction,
       UpdateTargetRelation,
+      JsonPreview,
     },
     setup() {
       const { createMessage } = useMessage();
@@ -68,23 +48,18 @@
         clickToRowSelect: true,
         bordered: true,
         striped: true,
-        api: Api.targetRelationList,
+        api: Api.targetRelationsList,
         columns: getRelationColumns(),
         useSearchForm: true,
         formConfig: getTargetRelationSearchBarConfig(),
         showIndexColumn: false,
+        ellipsis: false,
         rowKey: 'relationTypeCode',
         pagination: { pageSize: 10, current: 0 },
-        ellipsis: false,
         fetchSetting: {
           listField: 'content',
           pageField: 'number',
           sizeField: 'size',
-        },
-        actionColumn: {
-          title: '操作',
-          dataIndex: 'action',
-          slots: { customRender: 'action' },
         },
         beforeFetch: (params) => {
           console.log('params', params);
@@ -115,12 +90,12 @@
         }
       }
       function handleOpenUpdateDrawer(record = {}) {
-        updateMode.value = Object.keys(record).length !== 0 ? 'edit' : 'new';
+        updateMode.value = !!record ? 'edit' : 'new';
         updateDataSource.value = record;
         toggleDrawerVisible(true);
       }
 
-      const JSONData = ref(null);
+      const JSONData = ref(undefined);
       function onSelectChange(_key, record) {
         JSONData.value = record[0];
       }

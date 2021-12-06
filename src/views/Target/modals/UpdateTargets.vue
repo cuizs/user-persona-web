@@ -28,20 +28,8 @@
         </component>
       </FormItem>
     </Form>
-    <template #appendFooter>
-      <div
-        :style="{
-          position: 'absolute',
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          borderTop: '1px solid #e9e9e9',
-          padding: '10px 16px',
-          background: '#fff',
-          textAlign: 'right',
-          zIndex: 1,
-        }"
-      >
+    <template #footer>
+      <div>
         <a-button :style="{ marginRight: '8px' }" @click="onReset"> 重置 </a-button>
         <a-button type="primary" @click="onSubmit" :loading="submiting"> 提交 </a-button>
       </div>
@@ -57,6 +45,7 @@
     unref,
     nextTick,
     getCurrentInstance,
+    ComponentInternalInstance,
   } from 'vue';
   import { getTargetUpdateSchema } from '../_config';
   import { BasicDrawer } from '/@/components/Drawer';
@@ -75,7 +64,7 @@
       },
       dataSource: {
         type: Object,
-        default: {},
+        default: () => ({}),
       },
     },
     components: {
@@ -89,8 +78,9 @@
       Select,
       Options: Select.Option,
     },
+    emits: ['update:visible', 'reloadTable'],
     setup(props, { emit }) {
-      const { proxy } = getCurrentInstance();
+      const { proxy } = getCurrentInstance() as ComponentInternalInstance;
       const schemas = ref(getTargetUpdateSchema(proxy));
 
       const formRef = ref<Nullable<FormActionType>>(null);
@@ -114,7 +104,7 @@
       watch(
         () => props.dataSource,
         (val) => {
-          if (!val) {
+          if (!val || Object.keys(val).length === 0) {
             stateFormData.value = { ...formData };
             return;
           }

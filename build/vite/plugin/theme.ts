@@ -64,11 +64,10 @@ export function configThemePlugin(isBuild: boolean): Plugin[] {
         // #8b949e
         'text-color-secondary': '#8b949e',
         'border-color-base': '#303030',
-        // 'border-color-split': '#30363d',
+        'border-color-split': '#30363d',
         'item-active-bg': '#111b26',
         'app-content-background': '#1e1e1e',
         'tree-node-selected-bg': '#11263c',
-
         'alert-success-border-color': '#274916',
         'alert-success-bg-color': '#162312',
         'alert-success-icon-color': '#49aa19',
@@ -81,6 +80,7 @@ export function configThemePlugin(isBuild: boolean): Plugin[] {
         'alert-error-border-color': '#58181c',
         'alert-error-bg-color': '#2a1215',
         'alert-error-icon-color': '#a61d24',
+        'dark-switch-bg-color': '#606266',
       },
     }),
   ];

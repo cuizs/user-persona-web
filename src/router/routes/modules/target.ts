@@ -34,6 +34,24 @@ const dashboard: AppRouteModule = {
         // icon: 'foundation:target-two',
       },
     },
+    {
+      path: 'typeInfo',
+      name: 'TargetTypeInfo',
+      component: () => import('/@/views/Target/TargetTypeInfo.vue'),
+      meta: {
+        title: t('routes.target.targetTypeInfo'),
+        // icon: 'foundation:target-two',
+      },
+    },
+    {
+      path: 'relationInfo',
+      name: 'TargetRelationInfo',
+      component: () => import('/@/views/Target/TargetRelationInfo.vue'),
+      meta: {
+        title: t('routes.target.targetRelationInfo'),
+        // icon: 'foundation:target-two',
+      },
+    },
   ],
 };
 
